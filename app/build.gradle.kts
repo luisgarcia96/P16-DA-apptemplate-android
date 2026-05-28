@@ -1,11 +1,16 @@
 import java.io.FileInputStream
 import java.util.Properties
+import org.gradle.api.tasks.testing.Test
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
+import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("jacoco")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -40,6 +45,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+
         release {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
@@ -65,6 +75,92 @@ android {
     testOptions {
         animationsDisabled = true
     }
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+tasks.withType<Test>().configureEach {
+    extensions.configure(JacocoTaskExtension::class.java) {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+val jacocoExclusions = listOf(
+    "**/R.class",
+    "**/R$*.class",
+    "**/BuildConfig.*",
+    "**/Manifest*.*",
+    "**/*Test*.*",
+    "android/**/*.*",
+    "**/*\$Companion*.*",
+    "**/*\$Lambda$*.*",
+    "**/*\$inlined$*.*",
+    "**/*_Factory*.*",
+    "**/*_MembersInjector*.*",
+)
+
+val debugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
+    exclude(jacocoExclusions)
+}
+val javacDebugTree = fileTree("$buildDir/intermediates/javac/debug/classes") {
+    exclude(jacocoExclusions)
+}
+
+val mainSource = files(
+    "$projectDir/src/main/java",
+    "$projectDir/src/main/kotlin"
+)
+
+val coverageExecutionData = fileTree(buildDir) {
+    include(
+        "jacoco/testDebugUnitTest.exec",
+        "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+        "outputs/code_coverage/debugAndroidTest/connected/**/*.ec",
+        "outputs/code-coverage/connected/*coverage.ec"
+    )
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    group = "verification"
+    description = "Generates JaCoCo coverage reports for unit and instrumentation tests."
+    dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
+
+    classDirectories.setFrom(files(debugTree, javacDebugTree))
+    sourceDirectories.setFrom(mainSource)
+    executionData.setFrom(coverageExecutionData)
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+    group = "verification"
+    description = "Verifies JaCoCo coverage metrics for unit and instrumentation tests."
+    dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
+
+    classDirectories.setFrom(files(debugTree, javacDebugTree))
+    sourceDirectories.setFrom(mainSource)
+    executionData.setFrom(coverageExecutionData)
+
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.60".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn("jacocoTestCoverageVerification")
 }
 
 dependencies {
