@@ -52,7 +52,7 @@ android {
 
         release {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -165,35 +165,47 @@ tasks.named("check") {
 
 dependencies {
     val roomVersion = "2.6.0"
+    val hiltVersion = "2.42"
+    val hiltNavigationFragmentVersion = "1.0.0"
+    val coreKtxVersion = "1.7.0"
+    val appCompatVersion = "1.6.1"
+    val materialVersion = "1.10.0"
+    val constraintLayoutVersion = "2.1.4"
+    val activityKtxVersion = "1.8.0"
+    val fragmentKtxVersion = "1.6.1"
+    val junitVersion = "4.13.2"
+    val mockitoKotlinVersion = "5.0.0"
+    val desugarJdkLibsVersion = "2.0.4"
+    val androidXTestJunitVersion = "1.1.5"
+    val espressoCoreVersion = "3.6.0"
+    val androidXTestRunnerVersion = "1.6.0"
+    val androidXTestRulesVersion = "1.6.0"
+    val tracingVersion = "1.2.0"
 
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
+    implementation("com.google.dagger:hilt-android:$hiltVersion")
+    implementation("androidx.hilt:hilt-navigation-fragment:$hiltNavigationFragmentVersion")
+    implementation("androidx.core:core-ktx:$coreKtxVersion")
+    implementation("androidx.appcompat:appcompat:$appCompatVersion")
+    implementation("com.google.android.material:material:$materialVersion")
+    implementation("androidx.constraintlayout:constraintlayout:$constraintLayoutVersion")
+    implementation("androidx.activity:activity-ktx:$activityKtxVersion")
+    implementation("androidx.fragment:fragment-ktx:$fragmentKtxVersion")
+    implementation("androidx.tracing:tracing:$tracingVersion")
+
     kapt("androidx.room:room-compiler:$roomVersion")
+    kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
 
-    //Hilt
-    implementation("com.google.dagger:hilt-android:2.42")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
-    kapt("com.google.dagger:hilt-android-compiler:2.42")
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
 
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.activity:activity-ktx:1.8.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.1")
+    androidTestImplementation("androidx.test.ext:junit:$androidXTestJunitVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-core:$espressoCoreVersion")
+    androidTestImplementation("androidx.test:runner:$androidXTestRunnerVersion")
+    androidTestImplementation("androidx.test:rules:$androidXTestRulesVersion")
 
-    //Tests
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
-
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.0")
-
-    androidTestImplementation("androidx.test:runner:1.6.0")
-    androidTestImplementation("androidx.test:rules:1.6.0")
-    implementation("androidx.tracing:tracing:1.2.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:$desugarJdkLibsVersion")
 }
 kapt {
     correctErrorTypes = true
