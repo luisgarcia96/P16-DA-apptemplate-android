@@ -6,6 +6,12 @@ plugins {
     id("org.sonarqube") version "5.1.0.4882"
 }
 
+allprojects {
+    dependencyLocking {
+        lockAllConfigurations()
+    }
+}
+
 fun ProviderFactory.sonarValue(propertyName: String, environmentName: String) =
     gradleProperty(propertyName)
         .orElse(environmentVariable(environmentName))
