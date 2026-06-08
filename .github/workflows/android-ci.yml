@@ -44,6 +44,12 @@ jobs:
       - name: Run unit tests
         run: ./gradlew :app:testDebugUnitTest --no-daemon
 
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       # Instrumented tests need a running Android emulator before Sonar can collect coverage.
       - name: Run instrumented tests and Sonar analysis
         uses: reactivecircus/android-emulator-runner@v2
