@@ -31,6 +31,16 @@ jobs:
       - name: Grant Gradle permission
         run: chmod +x gradlew
 
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release-key.jks
+          cat > keystore.properties <<EOF
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          storeFile=release-key.jks
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          EOF
+
       - name: Run unit tests
         run: ./gradlew :app:testDebugUnitTest --no-daemon
 
