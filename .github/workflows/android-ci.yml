@@ -34,6 +34,7 @@ jobs:
       - name: Run unit tests
         run: ./gradlew :app:testDebugUnitTest --no-daemon
 
+      # Instrumented tests need a running Android emulator before Sonar can collect coverage.
       - name: Run instrumented tests and Sonar analysis
         uses: reactivecircus/android-emulator-runner@v2
         with:
