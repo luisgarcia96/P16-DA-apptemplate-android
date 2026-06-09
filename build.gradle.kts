@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.7.0" apply false
     id("com.google.dagger.hilt.android") version "2.42" apply false
     id("org.sonarqube") version "5.1.0.4882"
+    id("com.google.firebase.appdistribution") version "5.2.1" apply false
 }
 
 allprojects {

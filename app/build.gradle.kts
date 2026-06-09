@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
@@ -10,6 +11,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.firebase.appdistribution")
     id("jacoco")
 }
 
@@ -57,6 +59,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            firebaseAppDistribution {
+                appId = providers.environmentVariable("FIREBASE_APP_ID").orNull
+                artifactType = "APK"
+                groups = providers.environmentVariable("FIREBASE_TESTER_GROUPS").orNull
+                releaseNotes = providers.environmentVariable("FIREBASE_RELEASE_NOTES").orElse(
+                    "Automated release from GitHub Actions."
+                ).get()
+            }
         }
     }
     compileOptions {
