@@ -43,5 +43,20 @@ jobs:
       - name: Decode Firebase service account
         run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" | base64 --decode > "$GOOGLE_APPLICATION_CREDENTIALS"
 
-      - name: Build and upload release APK
-        run: ./gradlew :app:assembleRelease :app:appDistributionUploadRelease --no-daemon
+      - name: Verify distribution configuration
+        run: |
+          test -s release-key.jks
+          test -s keystore.properties
+          test -s "$GOOGLE_APPLICATION_CREDENTIALS"
+          test -n "$FIREBASE_APP_ID"
+          test -n "$FIREBASE_TESTER_GROUPS"
+          jq -e '.project_id and .client_email and .private_key' "$GOOGLE_APPLICATION_CREDENTIALS" > /dev/null
+
+      - name: Build release APK
+        run: ./gradlew :app:assembleRelease --no-daemon
+
+      - name: Verify release APK
+        run: ls -lh app/build/outputs/apk/release/*.apk
+
+      - name: Upload release APK to Firebase App Distribution
+        run: ./gradlew :app:appDistributionUploadRelease --stacktrace --info --no-daemon
