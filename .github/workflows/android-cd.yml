@@ -33,7 +33,7 @@ jobs:
 
       - name: Decode release keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release-key.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release-key.jks
           cat > keystore.properties <<EOF
           keyAlias=${{ secrets.KEY_ALIAS }}
           keyPassword=${{ secrets.KEY_PASSWORD }}
@@ -46,7 +46,7 @@ jobs:
 
       - name: Verify distribution configuration
         run: |
-          test -s release-key.jks
+          test -s app/release-key.jks
           test -s keystore.properties
           test -s "$GOOGLE_APPLICATION_CREDENTIALS"
           test -n "$FIREBASE_APP_ID"
