@@ -3,7 +3,14 @@ plugins {
     id("com.android.application") version "8.1.1" apply false
     id("org.jetbrains.kotlin.android") version "1.7.0" apply false
     id("com.google.dagger.hilt.android") version "2.42" apply false
-    id("org.sonarqube") version "6.1.0.5360"
+    id("org.sonarqube") version "5.1.0.4882"
+    id("com.google.firebase.appdistribution") version "5.2.1" apply false
+}
+
+allprojects {
+    dependencyLocking {
+        lockAllConfigurations()
+    }
 }
 
 fun ProviderFactory.sonarValue(propertyName: String, environmentName: String) =

@@ -11,8 +11,8 @@ jobs:
 
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+      SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+      SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
       SONAR_HOST_URL: https://sonarcloud.io
 
     steps:
@@ -31,9 +31,26 @@ jobs:
       - name: Grant Gradle permission
         run: chmod +x gradlew
 
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release-key.jks
+          cat > keystore.properties <<EOF
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          storeFile=release-key.jks
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          EOF
+
       - name: Run unit tests
         run: ./gradlew :app:testDebugUnitTest --no-daemon
 
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Instrumented tests need a running Android emulator before Sonar can collect coverage.
       - name: Run instrumented tests and Sonar analysis
         uses: reactivecircus/android-emulator-runner@v2
         with:
