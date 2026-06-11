@@ -2,7 +2,8 @@ name: Android CD
 
 on:
   push:
-    branches: [master]
+    tags:
+      - "v*"
   workflow_dispatch:
 
 jobs:
